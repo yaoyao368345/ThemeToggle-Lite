@@ -13,6 +13,10 @@ LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lpa
         return 0;
     }
 
+    if (message == WM_SETTINGCHANGE || message == WM_THEMECHANGED) {
+        UpdateTrayIcon(window);
+    }
+
     if (message == WM_DESTROY) {
         RemoveTrayIcon(window);
         PostQuitMessage(0);

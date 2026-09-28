@@ -1,6 +1,7 @@
 #include "tray.h"
 
 #include "theme.h"
+#include "resource.h"
 
 #include <shellapi.h>
 
@@ -19,16 +20,28 @@ NOTIFYICONDATAW MakeTrayData(HWND window) {
     return data;
 }
 
+HICON CurrentThemeIcon() {
+    const int resource = GetCurrentTheme() == Theme::Light ? IDI_LIGHT : IDI_DARK;
+    return LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(resource));
+}
+
 }  // namespace
 
 bool CreateTrayIcon(HWND window) {
     NOTIFYICONDATAW data = MakeTrayData(window);
     data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     data.uCallbackMessage = kTrayIconMessage;
-    data.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    data.hIcon = CurrentThemeIcon();
     lstrcpynW(data.szTip, L"ThemeToggle Lite", ARRAYSIZE(data.szTip));
 
     return data.hIcon != nullptr && Shell_NotifyIconW(NIM_ADD, &data) != FALSE;
+}
+
+bool UpdateTrayIcon(HWND window) {
+    NOTIFYICONDATAW data = MakeTrayData(window);
+    data.uFlags = NIF_ICON;
+    data.hIcon = CurrentThemeIcon();
+    return data.hIcon != nullptr && Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
 }
 
 void RemoveTrayIcon(HWND window) {
@@ -39,7 +52,9 @@ void RemoveTrayIcon(HWND window) {
 void HandleTrayNotification(HWND window, LPARAM event) {
     switch (static_cast<UINT>(event)) {
         case WM_LBUTTONUP:
-            ToggleTheme();
+            if (ToggleTheme()) {
+                UpdateTrayIcon(window);
+            }
             break;
         case WM_RBUTTONUP:
             ShowTrayMenu(window);
@@ -70,7 +85,9 @@ void ShowTrayMenu(HWND window) {
 
         switch (command) {
             case kToggleCommand:
-                ToggleTheme();
+                if (ToggleTheme()) {
+                    UpdateTrayIcon(window);
+                }
                 break;
             case kAboutCommand:
                 MessageBoxW(window, L"ThemeToggle Lite v0.1.0",

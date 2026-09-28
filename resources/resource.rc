@@ -1,0 +1,4 @@
+#include "resource.h"
+
+IDI_LIGHT ICON "light.ico"
+IDI_DARK ICON "dark.ico"
