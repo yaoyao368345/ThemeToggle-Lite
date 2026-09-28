@@ -1,5 +1,6 @@
 #include "tray.h"
 
+#include "startup.h"
 #include "theme.h"
 #include "resource.h"
 
@@ -11,6 +12,7 @@ constexpr UINT kTrayIconId = 1;
 constexpr UINT kToggleCommand = 1001;
 constexpr UINT kAboutCommand = 1002;
 constexpr UINT kExitCommand = 1003;
+constexpr UINT kStartupCommand = 1004;
 
 NOTIFYICONDATAW MakeTrayData(HWND window) {
     NOTIFYICONDATAW data{};
@@ -90,9 +92,18 @@ void ShowTrayMenu(HWND window) {
         return;
     }
 
+    const StartupStatus startup = GetStartupStatus();
+    const UINT startup_flags = MF_STRING |
+        (startup == StartupStatus::Enabled ? MF_CHECKED : 0) |
+        (startup == StartupStatus::Error ? MF_GRAYED : 0);
+    const wchar_t* startup_label = startup == StartupStatus::StalePath
+        ? L"修复开机自启"
+        : startup == StartupStatus::Error ? L"开机自启（无法读取）" : L"开机自启";
+
     const bool menu_ready = AppendMenuW(menu, MF_STRING, kToggleCommand, L"切换主题") &&
-                            AppendMenuW(menu, MF_STRING, kAboutCommand, L"关于") &&
+                            AppendMenuW(menu, startup_flags, kStartupCommand, startup_label) &&
                             AppendMenuW(menu, MF_SEPARATOR, 0, nullptr) &&
+                            AppendMenuW(menu, MF_STRING, kAboutCommand, L"关于") &&
                             AppendMenuW(menu, MF_STRING, kExitCommand, L"退出");
     if (!menu_ready) {
         DestroyMenu(menu);
@@ -112,8 +123,13 @@ void ShowTrayMenu(HWND window) {
             case kToggleCommand:
                 ToggleFromTray(window);
                 break;
+            case kStartupCommand:
+                if (!SetStartupEnabled(startup != StartupStatus::Enabled)) {
+                    ShowError(window, L"无法更改开机自启设置。请检查当前用户的启动项是否可写。");
+                }
+                break;
             case kAboutCommand:
-                MessageBoxW(window, L"ThemeToggle Lite v0.1.0",
+                MessageBoxW(window, L"ThemeToggle Lite v0.2.0",
                             L"关于 ThemeToggle Lite", MB_OK | MB_ICONINFORMATION);
                 break;
             case kExitCommand:

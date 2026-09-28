@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(ThemeToggle VERSION 0.1.0 LANGUAGES CXX RC)
+project(ThemeToggle VERSION 0.2.0 LANGUAGES CXX RC)
 
 add_executable(ThemeToggle WIN32
     src/main.cpp
     src/theme.cpp
     src/tray.cpp
+    src/startup.cpp
     resources/resource.rc
 )
 

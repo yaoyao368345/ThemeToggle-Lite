@@ -17,6 +17,7 @@ Keep responsibilities separated:
 - `main.cpp`: application lifecycle, message loop, and single-instance handling.
 - `theme.cpp`: Windows registry theme state, theme switching, and `WM_SETTINGCHANGE` notification.
 - `tray.cpp`: notification area icon, tray events, and context menu.
+- `startup.cpp`: optional current-user startup registration in the Windows Run key.
 
 ## Coding style
 
@@ -47,4 +48,4 @@ cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-Phase 1 implements only the application entry point, a hidden Win32 window, the message loop, and single-instance protection. Theme switching and the tray icon belong to later phases.
+Keep startup registration optional and tied to the current executable path.
