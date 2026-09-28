@@ -7,6 +7,10 @@ namespace {
 constexpr wchar_t kWindowClassName[] = L"ThemeToggleLite.HiddenWindow";
 constexpr wchar_t kMutexName[] = L"Local\\ThemeToggleLite.Singleton";
 
+void ShowStartupError(const wchar_t* message) {
+    MessageBoxW(nullptr, message, L"ThemeToggle Lite", MB_OK | MB_ICONERROR);
+}
+
 LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     if (message == kTrayIconMessage) {
         HandleTrayNotification(window, lparam);
@@ -31,6 +35,7 @@ LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lpa
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
     HANDLE mutex = CreateMutexW(nullptr, FALSE, kMutexName);
     if (mutex == nullptr) {
+        ShowStartupError(L"无法创建单实例锁，程序未启动。");
         return 1;
     }
 
@@ -45,6 +50,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
     window_class.lpszClassName = kWindowClassName;
 
     if (RegisterClassW(&window_class) == 0) {
+        ShowStartupError(L"无法注册程序窗口，程序未启动。");
         CloseHandle(mutex);
         return 1;
     }
@@ -54,12 +60,14 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
         CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         nullptr, nullptr, instance, nullptr);
     if (window == nullptr) {
+        ShowStartupError(L"无法创建程序窗口，程序未启动。");
         UnregisterClassW(kWindowClassName, instance);
         CloseHandle(mutex);
         return 1;
     }
 
     if (!CreateTrayIcon(window)) {
+        ShowStartupError(L"无法创建托盘图标。请确认 Windows 资源管理器正在运行，且当前用户的主题设置可读。");
         DestroyWindow(window);
         UnregisterClassW(kWindowClassName, instance);
         CloseHandle(mutex);
@@ -78,5 +86,8 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
     }
     UnregisterClassW(kWindowClassName, instance);
     CloseHandle(mutex);
+    if (result == -1) {
+        ShowStartupError(L"程序消息循环发生错误，已退出。");
+    }
     return result == -1 ? 1 : static_cast<int>(message.wParam);
 }

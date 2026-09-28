@@ -5,8 +5,9 @@ enum class Theme {
     Dark,
 };
 
-// Returns Light if the theme settings cannot be read.
-Theme GetCurrentTheme();
+// Missing Windows theme settings use the default Light mode.
+// Other registry errors return false without changing theme.
+bool GetCurrentTheme(Theme& theme);
 
 bool SetTheme(Theme theme);
 
