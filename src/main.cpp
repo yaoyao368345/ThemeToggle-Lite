@@ -1,12 +1,20 @@
 #include <windows.h>
 
+#include "tray.h"
+
 namespace {
 
 constexpr wchar_t kWindowClassName[] = L"ThemeToggleLite.HiddenWindow";
 constexpr wchar_t kMutexName[] = L"Local\\ThemeToggleLite.Singleton";
 
 LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+    if (message == kTrayIconMessage) {
+        HandleTrayNotification(window, lparam);
+        return 0;
+    }
+
     if (message == WM_DESTROY) {
+        RemoveTrayIcon(window);
         PostQuitMessage(0);
         return 0;
     }
@@ -47,6 +55,13 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
         return 1;
     }
 
+    if (!CreateTrayIcon(window)) {
+        DestroyWindow(window);
+        UnregisterClassW(kWindowClassName, instance);
+        CloseHandle(mutex);
+        return 1;
+    }
+
     MSG message{};
     int result = 0;
     while ((result = GetMessageW(&message, nullptr, 0, 0)) > 0) {
@@ -54,7 +69,9 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int) {
         DispatchMessageW(&message);
     }
 
-    DestroyWindow(window);
+    if (IsWindow(window)) {
+        DestroyWindow(window);
+    }
     UnregisterClassW(kWindowClassName, instance);
     CloseHandle(mutex);
     return result == -1 ? 1 : static_cast<int>(message.wParam);
