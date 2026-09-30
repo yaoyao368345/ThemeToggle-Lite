@@ -12,5 +12,8 @@ add_executable(ThemeToggle WIN32
 
 target_compile_features(ThemeToggle PRIVATE cxx_std_20)
 target_compile_definitions(ThemeToggle PRIVATE UNICODE _UNICODE)
+target_compile_options(ThemeToggle PRIVATE
+    "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/utf-8>"
+)
 target_include_directories(ThemeToggle PRIVATE resources)
 target_link_libraries(ThemeToggle PRIVATE user32 shell32 advapi32)
