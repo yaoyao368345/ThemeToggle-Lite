@@ -3,6 +3,7 @@
 #include "startup.h"
 #include "theme.h"
 #include "resource.h"
+#include "version.h"
 
 #include <shellapi.h>
 
@@ -138,7 +139,7 @@ void ShowTrayMenu(HWND window) {
                 }
                 break;
             case kAboutCommand:
-                MessageBoxW(window, L"ThemeToggle Lite v0.2.0",
+                MessageBoxW(window, L"ThemeToggle Lite v" THEMETOGGLE_VERSION_W,
                             L"关于 ThemeToggle Lite", MB_OK | MB_ICONINFORMATION);
                 break;
             case kExitCommand:

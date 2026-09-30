@@ -1,4 +1,35 @@
+#include <windows.h>
 #include "resource.h"
+#include "version.h"
 
 IDI_LIGHT ICON "light.ico"
 IDI_DARK ICON "dark.ico"
+
+1 VERSIONINFO
+FILEVERSION THEMETOGGLE_VERSION_NUMBER
+PRODUCTVERSION THEMETOGGLE_VERSION_NUMBER
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE 0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "yaoyao368345\0"
+            VALUE "FileDescription", "ThemeToggle Lite\0"
+            VALUE "FileVersion", THEMETOGGLE_VERSION_STRING "\0"
+            VALUE "InternalName", "ThemeToggle\0"
+            VALUE "LegalCopyright", "Copyright (c) 2026 yaoyao368345\0"
+            VALUE "OriginalFilename", "ThemeToggle.exe\0"
+            VALUE "ProductName", "ThemeToggle Lite\0"
+            VALUE "ProductVersion", THEMETOGGLE_VERSION_STRING "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
