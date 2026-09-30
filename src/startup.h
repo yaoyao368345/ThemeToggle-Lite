@@ -2,7 +2,7 @@
 
 enum class StartupStatus {
     Disabled,
-    Enabled,
+    Registered,
     StalePath,
     Error,
 };

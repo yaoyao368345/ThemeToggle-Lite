@@ -69,7 +69,7 @@ StartupStatus GetStartupStatus() {
     }
 
     return CompareStringOrdinal(value.c_str(), -1, command.c_str(), -1, TRUE) == CSTR_EQUAL
-        ? StartupStatus::Enabled : StartupStatus::StalePath;
+        ? StartupStatus::Registered : StartupStatus::StalePath;
 }
 
 bool SetStartupEnabled(bool enabled) {

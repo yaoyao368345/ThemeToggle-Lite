@@ -13,6 +13,7 @@ constexpr UINT kToggleCommand = 1001;
 constexpr UINT kAboutCommand = 1002;
 constexpr UINT kExitCommand = 1003;
 constexpr UINT kStartupCommand = 1004;
+constexpr UINT kStartupSettingsCommand = 1005;
 
 NOTIFYICONDATAW MakeTrayData(HWND window) {
     NOTIFYICONDATAW data{};
@@ -94,14 +95,15 @@ void ShowTrayMenu(HWND window) {
 
     const StartupStatus startup = GetStartupStatus();
     const UINT startup_flags = MF_STRING |
-        (startup == StartupStatus::Enabled ? MF_CHECKED : 0) |
+        (startup == StartupStatus::Registered ? MF_CHECKED : 0) |
         (startup == StartupStatus::Error ? MF_GRAYED : 0);
     const wchar_t* startup_label = startup == StartupStatus::StalePath
-        ? L"修复开机自启"
-        : startup == StartupStatus::Error ? L"开机自启（无法读取）" : L"开机自启";
+        ? L"修复开机自启登记"
+        : startup == StartupStatus::Error ? L"开机自启登记（无法读取）" : L"开机自启登记";
 
     const bool menu_ready = AppendMenuW(menu, MF_STRING, kToggleCommand, L"切换主题") &&
                             AppendMenuW(menu, startup_flags, kStartupCommand, startup_label) &&
+                            AppendMenuW(menu, MF_STRING, kStartupSettingsCommand, L"Windows 启动应用设置") &&
                             AppendMenuW(menu, MF_SEPARATOR, 0, nullptr) &&
                             AppendMenuW(menu, MF_STRING, kAboutCommand, L"关于") &&
                             AppendMenuW(menu, MF_STRING, kExitCommand, L"退出");
@@ -124,8 +126,15 @@ void ShowTrayMenu(HWND window) {
                 ToggleFromTray(window);
                 break;
             case kStartupCommand:
-                if (!SetStartupEnabled(startup != StartupStatus::Enabled)) {
+                if (!SetStartupEnabled(startup != StartupStatus::Registered)) {
                     ShowError(window, L"无法更改开机自启设置。请检查当前用户的启动项是否可写。");
+                }
+                break;
+            case kStartupSettingsCommand:
+                if (reinterpret_cast<INT_PTR>(ShellExecuteW(
+                        window, L"open", L"ms-settings:startupapps",
+                        nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
+                    ShowError(window, L"无法打开 Windows 启动应用设置。请在任务管理器的启动应用中查看 ThemeToggleLite。");
                 }
                 break;
             case kAboutCommand:
